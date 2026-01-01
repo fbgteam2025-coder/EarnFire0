@@ -1,548 +1,495 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Premium Rewards</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>MegaRewards Pro - Earn & Play</title>
     
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
-        /* --- CSS VARIABLES & THEME --- */
         :root {
-            --primary: #FF4757; 
-            --primary-grad: linear-gradient(135deg, #FF4757, #FF6B81);
-            --secondary-grad: linear-gradient(135deg, #5352ed, #3742fa);
-            --bg-light: #F1F2F6; --card-light: #FFFFFF; --text-light: #2F3542;
-            --bg-dark: #1E272E; --card-dark: #2F3640; --text-dark: #F1F2F6;
-            --nav-height: 70px;
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fdcb6e;
+            --success: #00b894;
+            --danger: #d63031;
+            --bg-light: #f9f9fb;
+            --card-light: #ffffff;
+            --text-main: #2d3436;
+            --nav-bg: #ffffff;
+            --glass: rgba(255, 255, 255, 0.8);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { background: var(--bg-light); color: var(--text-light); padding-bottom: 90px; user-select: none; }
-        body.dark-theme { background: var(--bg-dark); color: var(--text-dark); }
-        body.dark-theme .card { background: var(--card-dark); color: var(--text-dark); border: 1px solid #4b6584; }
-        body.dark-theme .bottom-nav { background: rgba(47, 54, 64, 0.95); border-top: 1px solid #4b6584; }
-
-        /* --- LOADER --- */
-        #loader { position: fixed; inset: 0; background: var(--bg-light); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #ddd; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* --- HEADER --- */
-        .header {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
-            padding: 10px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            height: 60px;
-        }
-        body.dark-theme .header { background: rgba(30, 39, 46, 0.9); }
-        
-        .user-profile { display: flex; align-items: center; gap: 10px; }
-        .user-img { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--primary); }
-        .user-info h4 { font-size: 0.9rem; font-weight: 700; line-height: 1; }
-        .user-info span { font-size: 0.7rem; opacity: 0.7; }
-        
-        .balance-pill {
-            background: var(--primary-grad); color: white;
-            padding: 5px 12px; border-radius: 20px;
-            font-size: 0.85rem; font-weight: 600;
-            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);
-            display: flex; align-items: center; gap: 5px;
+        /* Dark Mode Support */
+        body.dark-theme {
+            --bg-light: #0f141e;
+            --card-light: #1c2331;
+            --text-main: #f5f6fa;
+            --nav-bg: #1c2331;
+            --glass: rgba(28, 35, 49, 0.8);
         }
 
-        /* --- LAYOUT --- */
-        .container { padding: 20px; max-width: 500px; margin: 0 auto; }
-        .page { display: none; animation: fadeIn 0.3s ease; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Ubuntu', sans-serif; }
+        body { background: var(--bg-light); color: var(--text-main); overflow-x: hidden; transition: 0.3s; padding-bottom: 100px; }
 
-        .card { background: var(--card-light); border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.02); }
-        
-        /* --- COMPONENTS --- */
-        .btn { border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; color: white; width: 100%; transition: 0.2s; font-size: 0.9rem; }
-        .btn-primary { background: var(--primary-grad); }
-        .btn-secondary { background: var(--secondary-grad); }
-        .btn:active { transform: scale(0.98); }
-        .btn:disabled { background: #ccc; cursor: not-allowed; opacity: 0.7; }
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
-        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stat-box { background: rgba(0,0,0,0.03); padding: 15px; border-radius: 12px; text-align: center; }
-        body.dark-theme .stat-box { background: rgba(255,255,255,0.05); }
-        .stat-val { font-size: 1.2rem; font-weight: 700; display: block; color: var(--primary); }
-        .stat-label { font-size: 0.75rem; opacity: 0.7; }
+        /* --- Header: Ultra Compact & Premium --- */
+        .premium-header {
+            position: sticky; top: 0; z-index: 1000;
+            background: var(--glass); backdrop-filter: blur(15px);
+            padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
 
-        /* --- TASKS --- */
-        .task-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.02); margin-bottom: 10px; border: 1px solid transparent; }
-        body.dark-theme .task-item { background: rgba(255,255,255,0.03); }
-        .task-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: white; flex-shrink: 0; }
-        .bg-tg { background: #229ED9; } .bg-yt { background: #FF0000; } .bg-web { background: #10ac84; } .bg-ad { background: #f39c12; }
-        
-        .task-info { flex: 1; }
-        .task-info h5 { font-size: 0.95rem; margin-bottom: 2px; }
-        .task-info p { font-size: 0.75rem; opacity: 0.7; }
-        .coin-badge { background: rgba(255, 71, 87, 0.1); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
-        .task-btn { padding: 6px 12px; font-size: 0.75rem; width: auto; }
+        .user-meta { display: flex; align-items: center; gap: 12px; }
+        .avatar-wrapper { position: relative; }
+        .user-avatar { width: 42px; height: 42px; border-radius: 12px; border: 2px solid var(--primary); padding: 2px; }
+        .status-dot { position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; background: var(--success); border-radius: 50%; border: 2px solid white; }
 
-        /* --- BOTTOM NAV --- */
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; padding: 6px 15px; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            display: flex; align-items: center; gap: 8px; font-weight: 700;
+        }
+
+        /* --- Modern Navigation --- */
         .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-            border-top: 1px solid #eee; display: flex; justify-content: space-around;
-            align-items: center; z-index: 1000;
+            position: fixed; bottom: 15px; left: 15px; right: 15px;
+            background: var(--nav-bg); height: 70px; border-radius: 25px;
+            display: flex; justify-content: space-around; align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .nav-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #a4b0be; cursor: pointer; width: 20%; }
-        .nav-btn i { font-size: 1.4rem; transition: 0.2s; }
-        .nav-btn span { font-size: 0.65rem; font-weight: 500; }
-        .nav-btn.active { color: var(--primary); }
-        .nav-btn.active i { transform: translateY(-3px); }
 
-        /* Input Fields */
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 500; }
-        .form-control { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; background: transparent; color: inherit; outline: none; }
-        .form-control:focus { border-color: var(--primary); }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            color: #b2bec3; text-decoration: none; font-size: 11px; font-weight: 500;
+            transition: 0.3s; cursor: pointer;
+        }
+
+        .nav-item i { font-size: 20px; }
+        .nav-item.active { color: var(--primary); transform: translateY(-5px); }
+        .nav-item.active i { color: var(--primary); }
+
+        /* --- App Pages & Cards --- */
+        .page { display: none; padding: 20px; animation: slideUp 0.4s ease-out; }
+        .page.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background: var(--card-light); border-radius: 20px; padding: 20px;
+            margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        /* --- Featured Game: Spin Wheel --- */
+        .spin-container { text-align: center; padding: 20px 0; }
+        #wheel { width: 250px; height: 250px; border-radius: 50%; border: 8px solid var(--card-light); box-shadow: 0 0 20px rgba(0,0,0,0.1); transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
+
+        /* --- Task System Styles --- */
+        .task-list { display: flex; flex-direction: column; gap: 15px; }
+        .task-box {
+            display: flex; align-items: center; gap: 15px; padding: 15px;
+            background: var(--bg-light); border-radius: 18px; transition: 0.3s;
+        }
+        .task-box:hover { transform: translateX(5px); }
+        .task-img { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; }
+
+        .btn-claim {
+            padding: 8px 18px; border: none; border-radius: 10px;
+            background: var(--primary); color: white; font-weight: 600;
+            cursor: pointer; transition: 0.2s;
+        }
+
+        /* --- Referral & Wallet --- */
+        .refer-code-box {
+            background: rgba(108, 92, 231, 0.05); border: 2px dashed var(--primary);
+            padding: 15px; border-radius: 15px; display: flex; justify-content: space-between;
+            align-items: center; margin: 15px 0;
+        }
+
+        .history-item {
+            display: flex; justify-content: space-between; padding: 12px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* --- Utilities --- */
+        .text-center { text-align: center; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .loader { position: fixed; inset: 0; background: var(--bg-light); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
-<body>
+<body class="light-theme">
 
-    <div id="loader">
-        <div class="spinner"></div>
-        <p style="margin-top:10px; font-weight:500;">Connecting...</p>
+    <div id="main-loader" class="loader">
+        <img src="https://cdn-icons-png.flaticon.com/512/7858/7858913.png" width="100" style="animation: bounce 2s infinite">
+        <h2 style="margin-top: 20px; letter-spacing: 2px;">MegaRewards</h2>
+        <div style="width: 150px; height: 4px; background: #eee; border-radius: 10px; margin-top: 10px; overflow: hidden;">
+            <div id="progress-bar" style="width: 0%; height: 100%; background: var(--primary); transition: 0.5s;"></div>
+        </div>
     </div>
 
-    <header class="header">
-        <div class="user-profile">
-            <img id="header-img" src="https://via.placeholder.com/40" class="user-img" alt="User">
-            <div class="user-info">
-                <h4 id="header-name">Guest</h4>
-                <span>Level 1</span>
+    <header class="premium-header">
+        <div class="user-meta">
+            <div class="avatar-wrapper">
+                <img id="u-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="user-avatar">
+                <div class="status-dot"></div>
+            </div>
+            <div>
+                <h4 id="u-name">Loading...</h4>
+                <p style="font-size: 10px; opacity: 0.6;"><i class="fas fa-crown text-warning"></i> VIP Member</p>
             </div>
         </div>
-        <div class="balance-pill">
-            <i class="fas fa-wallet"></i> <span id="header-balance">0.00</span>
+        <div class="balance-card">
+            <img src="https://cdn-icons-png.flaticon.com/512/1292/1292744.png" width="20">
+            <span id="u-balance">0.00</span>
         </div>
     </header>
 
-    <main class="container">
-        
-        <div id="home-page" class="page active">
-            <div class="card stats-row">
-                <div class="stat-box">
-                    <i class="fas fa-video" style="color: #f39c12;"></i>
-                    <span class="stat-val" id="today-ads">0</span>
-                    <span class="stat-label">Ads Watched</span>
+    <main>
+        <div id="home" class="page active">
+            <div class="card" style="background: linear-gradient(45deg, #6c5ce7, #a29bfe); color: white;">
+                <h3>Daily Check-in</h3>
+                <p style="font-size: 12px; margin: 5px 0 15px;">Login everyday to get free bonus coins!</p>
+                <button class="btn-claim" style="background: white; color: var(--primary);" onclick="dailyCheckIn()">Claim 5.00 TK</button>
+            </div>
+
+            <div class="grid-2">
+                <div class="card text-center" onclick="navTo('tasks')">
+                    <i class="fas fa-tasks" style="font-size: 24px; color: var(--primary);"></i>
+                    <p style="margin-top: 10px; font-weight: 600;">All Tasks</p>
                 </div>
-                <div class="stat-box">
-                    <i class="fas fa-coins" style="color: #2ecc71;"></i>
-                    <span class="stat-val" id="total-income">0.00</span>
-                    <span class="stat-label">Total Earned</span>
+                <div id="spin-trigger" class="card text-center" onclick="openSpinWheel()">
+                    <i class="fas fa-dharmachakra" style="font-size: 24px; color: var(--accent);"></i>
+                    <p style="margin-top: 10px; font-weight: 600;">Spin & Win</p>
                 </div>
             </div>
 
             <div class="card">
-                <h3 style="margin-bottom:10px; font-size:1rem;">Announcements</h3>
-                <div id="links-container"></div>
+                <h4 style="margin-bottom: 15px;"><i class="fas fa-bullhorn"></i> Official Updates</h4>
+                <div id="news-slider">
+                    <p style="font-size: 13px; color: #636e72;">Welcome to MegaRewards! Start earning by completing simple tasks. Withdrawals are processed within 24 hours.</p>
+                </div>
             </div>
-            
-            <button class="btn btn-secondary" onclick="navTo('leaderboard-page')">
-                <i class="fas fa-trophy"></i> View Leaderboard
-            </button>
         </div>
 
-        <div id="tasks-page" class="page">
-            <div class="card" style="background: var(--secondary-grad); color: white; text-align: center;">
-                <p style="opacity:0.9; font-size:0.8rem;">Earning Wallet</p>
-                <h1 style="font-size:2.5rem; margin:5px 0;"><span id="wallet-balance">0.00</span> ৳</h1>
-                <p style="font-size:0.75rem; margin-bottom:10px;">Move to Main Balance (Min: 100৳)</p>
-                <button id="btn-move-balance" class="btn" style="background:white; color:#3742fa; padding:8px;" disabled>Exchange Now</button>
+        <div id="tasks" class="page">
+            <div class="card" style="text-align: center;">
+                <p>Earning Wallet (Ads Balance)</p>
+                <h2 style="font-size: 32px; color: var(--primary);"><span id="ad-bal">0.00</span> ৳</h2>
+                <button class="btn-claim" style="width: 100%; margin-top: 10px;" onclick="transferBalance()">Transfer to Main Balance</button>
             </div>
 
-            <h3 style="font-size:1rem; margin: 15px 0 10px;">Daily Tasks</h3>
-            
-            <div id="ad-task-wrapper" class="task-item">
-                <div class="task-icon bg-ad"><i class="fas fa-play"></i></div>
-                <div class="task-info">
-                    <h5>Watch Ad</h5>
-                    <p>Earn Rewards per view</p>
-                </div>
-                <button class="btn task-btn btn-primary" onclick="watchAd()">Watch</button>
-            </div>
-
-            <h3 style="font-size:1rem; margin: 20px 0 10px;">Bonus Tasks</h3>
-            <div id="tasks-list">
+            <h4><i class="fas fa-star"></i> High Paying Tasks</h4>
+            <div id="task-container" class="task-list" style="margin-top: 15px;">
                 </div>
         </div>
 
-        <div id="wallet-page" class="page">
-            <div style="text-align:center; margin-bottom:20px;">
-                <i class="fas fa-university" style="font-size:2.5rem; color:var(--primary); margin-bottom:10px;"></i>
-                <h2>Withdraw</h2>
+        <div id="wallet" class="page">
+            <div class="card text-center">
+                <i class="fas fa-wallet" style="font-size: 40px; color: var(--primary);"></i>
+                <h2 style="margin: 10px 0;">Withdraw Funds</h2>
+                <p style="font-size: 13px; opacity: 0.7;">Minimum withdrawal 100 TK</p>
             </div>
-            
+
             <div class="card">
-                <form id="withdraw-form">
-                    <div class="input-group">
-                        <label>Select Method</label>
-                        <select id="wd-method" class="form-control" required>
-                            <option value="">Choose...</option>
+                <form id="wd-form">
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size: 12px; font-weight: 600;">Payment Method</label>
+                        <select id="wd-method" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 5px;">
+                            <option value="bkash">bKash Personal</option>
+                            <option value="nagad">Nagad Personal</option>
+                            <option value="upay">Upay Personal</option>
                         </select>
                     </div>
-                    <div class="input-group">
-                        <label>Account Number</label>
-                        <input type="number" id="wd-account" class="form-control" placeholder="017xxxxxxxx" required>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size: 12px; font-weight: 600;">Account Number</label>
+                        <input type="number" id="wd-acc" placeholder="017XXXXXXXX" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 5px;">
                     </div>
-                    <div class="input-group">
-                        <label>Amount</label>
-                        <input type="number" id="wd-amount" class="form-control" placeholder="Min 100" required>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size: 12px; font-weight: 600;">Amount (TK)</label>
+                        <input type="number" id="wd-amount" placeholder="Min 100" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 5px;">
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                    <button type="submit" class="btn-claim" style="width: 100%; padding: 15px;">Confirm Withdrawal</button>
                 </form>
             </div>
-            
-            <h3 style="font-size:1rem; margin-top:20px;">History</h3>
-            <div id="wd-history"></div>
+
+            <h4>Withdrawal History</h4>
+            <div id="wd-history" class="card" style="margin-top: 10px;">
+                <p class="text-center" style="font-size: 12px; opacity: 0.5;">No transactions yet.</p>
+            </div>
         </div>
 
-        <div id="refer-page" class="page">
-            <div class="card" style="text-align:center; padding:30px 15px;">
-                <img src="https://cdn-icons-png.flaticon.com/512/1256/1256650.png" width="80" alt="Refer">
-                <h2 style="margin:10px 0; color:var(--primary);">Refer & Earn</h2>
-                <p>Get <b id="ref-bonus-txt">0</b> TK for every friend!</p>
+        <div id="refer" class="page">
+            <div class="card text-center">
+                <img src="https://cdn-icons-png.flaticon.com/512/933/933310.png" width="120">
+                <h2 style="margin-top: 15px;">Invite & Earn</h2>
+                <p style="font-size: 14px; opacity: 0.8;">Share with your friends and get 10% of their earnings for lifetime!</p>
                 
-                <div style="background:rgba(0,0,0,0.05); padding:10px; border-radius:8px; margin-top:15px; display:flex; gap:10px;">
-                    <input type="text" id="ref-link" readonly style="border:none; background:transparent; width:100%; outline:none; text-align:center; font-size:0.8rem;">
-                    <i class="fas fa-copy" onclick="copyRef()" style="cursor:pointer; color:var(--primary);"></i>
+                <div class="refer-code-box">
+                    <span id="ref-link" style="font-weight: 700; color: var(--primary);">Loading...</span>
+                    <i class="fas fa-copy" onclick="copyRef()" style="cursor: pointer;"></i>
                 </div>
             </div>
 
-            <div class="stats-row">
-                <div class="stat-box">
-                    <span class="stat-val" id="ref-count">0</span>
-                    <span class="stat-label">Total Referrals</span>
+            <div class="grid-2">
+                <div class="card text-center">
+                    <span id="total-ref" style="display: block; font-size: 20px; font-weight: 700;">0</span>
+                    <span style="font-size: 11px;">Total Refers</span>
                 </div>
-                <div class="stat-box">
-                    <span class="stat-val" id="ref-earn">0</span>
-                    <span class="stat-label">Ref. Income</span>
+                <div class="card text-center">
+                    <span id="ref-income" style="display: block; font-size: 20px; font-weight: 700;">0.00</span>
+                    <span style="font-size: 11px;">Ref Income</span>
                 </div>
             </div>
         </div>
 
-        <div id="leaderboard-page" class="page">
-            <h2>Leaderboard</h2>
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <button class="btn" style="flex:1; background:#ddd; color:black;" onclick="loadLeaderboard('referral')">Referral</button>
-                <button class="btn" style="flex:1; background:#ddd; color:black;" onclick="loadLeaderboard('earning')">Earning</button>
+        <div id="profile" class="page">
+            <div class="card text-center">
+                <img id="p-img" src="" class="user-avatar" style="width: 80px; height: 80px; margin-bottom: 10px;">
+                <h3 id="p-name">Username</h3>
+                <p id="p-id" style="font-size: 12px; opacity: 0.6;">ID: 000000</p>
             </div>
-            <ul id="lb-list" style="list-style:none;"></ul>
-        </div>
-        
-        <div id="profile-page" class="page">
-            <div class="card" style="display:flex; align-items:center; gap:15px;">
-                <img id="profile-img" src="" style="width:60px; height:60px; border-radius:50%;">
-                <div>
-                    <h3 id="profile-name">User</h3>
-                    <p id="profile-id">ID: 00000</p>
+
+            <div class="card" style="padding: 0;">
+                <div class="task-box" onclick="window.open('https://t.me/your_channel')">
+                    <div class="task-img" style="background: #229ED9;"><i class="fab fa-telegram-plane"></i></div>
+                    <div style="flex: 1;">
+                        <h5>Official Telegram</h5>
+                        <p style="font-size: 11px;">Join for payment proofs</p>
+                    </div>
+                    <i class="fas fa-chevron-right" style="opacity: 0.3;"></i>
+                </div>
+                <div class="task-box" onclick="toggleTheme()">
+                    <div class="task-img" style="background: #2d3436;"><i class="fas fa-moon"></i></div>
+                    <div style="flex: 1;">
+                        <h5>Dark Mode</h5>
+                        <p style="font-size: 11px;">Switch app theme</p>
+                    </div>
                 </div>
             </div>
-            <button class="btn btn-secondary" onclick="window.open('https://t.me/YOUR_SUPPORT_USERNAME')">Contact Support</button>
-        </div>
 
+            <button class="btn-claim" style="width: 100%; background: var(--danger);" onclick="logout()">Logout / Reset</button>
+        </div>
     </main>
 
     <nav class="bottom-nav">
-        <button class="nav-btn active" onclick="navTo('home-page')"><i class="fas fa-home"></i><span>Home</span></button>
-        <button class="nav-btn" onclick="navTo('tasks-page')"><i class="fas fa-tasks"></i><span>Tasks</span></button>
-        <button class="nav-btn" onclick="navTo('wallet-page')"><i class="fas fa-wallet"></i><span>Wallet</span></button>
-        <button class="nav-btn" onclick="navTo('refer-page')"><i class="fas fa-user-friends"></i><span>Refer</span></button>
-        <button class="nav-btn" onclick="navTo('profile-page')"><i class="fas fa-user"></i><span>Profile</span></button>
+        <div class="nav-item active" onclick="navTo('home')"><i class="fas fa-home"></i><span>Home</span></div>
+        <div class="nav-item" onclick="navTo('tasks')"><i class="fas fa-layer-group"></i><span>Tasks</span></div>
+        <div class="nav-item" onclick="navTo('wallet')"><i class="fas fa-wallet"></i><span>Wallet</span></div>
+        <div class="nav-item" onclick="navTo('refer')"><i class="fas fa-user-plus"></i><span>Refer</span></div>
+        <div class="nav-item" onclick="navTo('profile')"><i class="fas fa-user-circle"></i><span>Profile</span></div>
     </nav>
+
+    <div id="spin-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; flex-direction: column;">
+        <div class="card" style="width: 90%; max-width: 350px;">
+            <div class="spin-container">
+                <img id="wheel" src="https://i.ibb.co/3MJ99Xh/wheel.png" alt="Wheel">
+                <div id="pointer" style="width: 40px; height: 40px; background: red; clip-path: polygon(50% 100%, 0 0, 100% 0); margin: -20px auto 20px; position: relative; z-index: 10;"></div>
+                <button id="spin-btn" class="btn-claim" style="width: 150px; padding: 15px;" onclick="spinNow()">SPIN NOW</button>
+            </div>
+            <button class="btn-claim" style="background: #ddd; color: #333;" onclick="closeSpin()">Close</button>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <script>
-        // === 1. CONFIGURATION (MUST CHANGE) ===
+        // === FIREBASE CONFIG ===
         const firebaseConfig = {
-            // আপনার Firebase Console থেকে এই তথ্যগুলো নিন এবং এখানে বসান
-            apiKey: "YOUR_API_KEY_HERE",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "SENDER_ID",
-            appId: "APP_ID"
+            apiKey: "AIzaSy...", // Replace with yours
+            authDomain: "mega-rewards.firebaseapp.com",
+            databaseURL: "https://mega-rewards-default-rtdb.firebaseio.com",
+            projectId: "mega-rewards",
+            storageBucket: "mega-rewards.appspot.com",
+            appId: "1:..."
         };
 
-        // --- GLOBAL VARIABLES ---
         const tg = window.Telegram.WebApp;
-        let db;
-        let user = {};
-        let appSettings = {}; 
-        let localBalance = 0;
+        let db, user = {}, config = {};
+        let isSpinning = false;
 
-        // --- INITIALIZATION ---
+        // === INITIALIZATION ===
         async function init() {
             try {
+                tg.ready();
                 tg.expand();
-                
-                // MOCK USER FOR BROWSER TESTING (Fix for "Not Logging In")
-                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                    user = tg.initDataUnsafe.user;
-                } else {
-                    console.log("Browser Mode Detected");
-                    user = { id: 123456, first_name: "Test", last_name: "User", username: "tester" }; // Mock Data
-                }
 
-                // Initialize Firebase
-                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                // 1. Loader Progress
+                let progress = 0;
+                const pInt = setInterval(() => {
+                    progress += 10;
+                    document.getElementById('progress-bar').style.width = progress + '%';
+                    if(progress >= 100) clearInterval(pInt);
+                }, 100);
+
+                // 2. Mock / TG User Login
+                const tgUser = tg.initDataUnsafe.user || { id: 777777, first_name: "Developer", last_name: "" };
+                
+                firebase.initializeApp(firebaseConfig);
                 db = firebase.database();
 
-                // Load Data
-                await loadConfig();
-                await loginUser();
-                
-                // Render UI
-                renderApp();
-                document.getElementById('loader').style.display = 'none';
+                // 3. Load Remote Config
+                const cSnap = await db.ref('config').once('value');
+                config = cSnap.val() || { adValue: 0.5, dailyBonus: 5, minWD: 100 };
 
-                // Setup Listeners
-                setupTaskListeners();
+                // 4. User System
+                const uRef = db.ref(`users/${tgUser.id}`);
+                const uSnap = await uRef.once('value');
                 
-            } catch (error) {
-                console.error("Init Error:", error);
-                alert("App Init Failed! Check Console. Likely Firebase Config or Rules issue.");
-                document.getElementById('loader').style.display = 'none'; // Still show app for debug
-            }
-        }
-
-        // --- DATA LOADING ---
-        async function loadConfig() {
-            try {
-                const snap = await db.ref('config').once('value');
-                appSettings = snap.val() || {
-                    adValue: 0.50, referralBonus: 5,
-                    withdrawMethods: [{name:"Bkash", min:100}, {name:"Nagad", min:100}],
-                    tasks: {}
-                };
-            } catch (e) {
-                console.log("Using default config (Offline/Error)");
-                appSettings = { adValue: 0.50, referralBonus: 5, withdrawMethods: [] };
-            }
-        }
-
-        async function loginUser() {
-            const userRef = db.ref(`users/${user.id}`);
-            const snap = await userRef.once('value');
-            
-            if (!snap.exists()) {
-                // New User Registration
-                const startParam = tg.initDataUnsafe.start_param;
-                const newUser = {
-                    id: user.id,
-                    firstName: user.first_name,
-                    balance: 0,
-                    referrals: 0,
-                    referredBy: startParam || null,
-                    totalEarned: 0,
-                    dailyAds: 0,
-                    lastActive: Date.now()
-                };
-                await userRef.set(newUser);
-                
-                // Give Referral Bonus
-                if (startParam && startParam != user.id) {
-                    db.ref(`users/${startParam}`).transaction(d => {
-                        if (d) { d.referrals = (d.referrals||0)+1; d.balance = (d.balance||0) + (appSettings.referralBonus||0); }
-                        return d;
-                    });
+                if(!uSnap.exists()) {
+                    const startParam = tg.initDataUnsafe.start_param;
+                    user = {
+                        id: tgUser.id,
+                        name: tgUser.first_name,
+                        balance: 0,
+                        adBalance: 0,
+                        referrals: 0,
+                        totalEarned: 0,
+                        lastCheckIn: 0,
+                        referredBy: startParam || null,
+                        completedTasks: {}
+                    };
+                    await uRef.set(user);
+                } else {
+                    user = uSnap.val();
                 }
-                user = newUser;
-            } else {
-                user = snap.val();
+
+                // 5. App Setup
+                renderUI();
+                setTimeout(() => {
+                    document.getElementById('main-loader').style.display = 'none';
+                }, 1500);
+
+            } catch(e) {
+                console.error(e);
+                Swal.fire("Connection Error", "Please check your internet or Firebase config.", "error");
             }
-            localBalance = parseFloat(localStorage.getItem(`tempBal_${user.id}`) || 0);
         }
 
-        // --- RENDERING UI ---
-        function renderApp() {
-            // Header
-            document.getElementById('header-name').innerText = user.firstName;
-            document.getElementById('header-img').src = user.photoUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-            document.getElementById('header-balance').innerText = (user.balance || 0).toFixed(2);
-            document.getElementById('profile-img').src = document.getElementById('header-img').src;
-            document.getElementById('profile-name').innerText = user.firstName;
-            document.getElementById('profile-id').innerText = `ID: ${user.id}`;
-
-            // Home Stats
-            document.getElementById('today-ads').innerText = user.dailyAds || 0;
-            document.getElementById('total-income').innerText = (user.totalEarned || 0).toFixed(2);
+        // === CORE FUNCTIONS ===
+        function renderUI() {
+            document.getElementById('u-name').innerText = user.name;
+            document.getElementById('u-balance').innerText = user.balance.toFixed(2);
+            document.getElementById('ad-bal').innerText = user.adBalance.toFixed(2);
+            document.getElementById('u-avatar').src = user.photoUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+            document.getElementById('p-img').src = document.getElementById('u-avatar').src;
+            document.getElementById('p-name').innerText = user.name;
+            document.getElementById('p-id').innerText = "ID: " + user.id;
+            document.getElementById('ref-link').innerText = `https://t.me/YourBot?startapp=${user.id}`;
+            document.getElementById('total-ref').innerText = user.referrals || 0;
             
-            // Wallet Page
-            document.getElementById('wallet-balance').innerText = localBalance.toFixed(2);
-            document.getElementById('btn-move-balance').disabled = localBalance < 100;
-            
-            // Refer Page
-            document.getElementById('ref-bonus-txt').innerText = appSettings.referralBonus;
-            document.getElementById('ref-link').value = `https://t.me/${appSettings.botUsername || 'YourBot'}?startapp=${user.id}`;
-            document.getElementById('ref-count').innerText = user.referrals || 0;
-            
-            // Withdraw Options
-            const wdSelect = document.getElementById('wd-method');
-            wdSelect.innerHTML = '<option value="">Select Method</option>';
-            if(appSettings.withdrawMethods) {
-                appSettings.withdrawMethods.forEach(m => {
-                    wdSelect.innerHTML += `<option value="${m.name}">${m.name} (Min: ${m.min})</option>`;
-                });
-            }
-
             renderTasks();
         }
 
-        // --- TASK SYSTEM (Telegram, Video, Visit) ---
         function renderTasks() {
-            const list = document.getElementById('tasks-list');
-            list.innerHTML = '';
+            const container = document.getElementById('task-container');
+            container.innerHTML = '';
             
-            if (!appSettings.tasks) return;
-            
-            Object.entries(appSettings.tasks).forEach(([key, task]) => {
-                const isDone = user.completedTasks && user.completedTasks[key];
-                
-                // Icon Logic
-                let icon = 'fa-globe'; let bg = 'bg-web';
-                if(task.type === 'telegram') { icon = 'fa-paper-plane'; bg = 'bg-tg'; }
-                if(task.type === 'video') { icon = 'fa-play'; bg = 'bg-yt'; }
-
-                const html = `
-                <div class="task-item">
-                    <div class="task-icon ${bg}"><i class="fas ${icon}"></i></div>
-                    <div class="task-info">
-                        <h5>${task.name}</h5>
-                        <div class="coin-badge">+${task.reward} TK</div>
+            // Standard Ad Task
+            container.innerHTML += `
+                <div class="task-box">
+                    <div class="task-img" style="background: var(--accent);"><i class="fas fa-video"></i></div>
+                    <div style="flex:1">
+                        <h5>Premium Video Ad</h5>
+                        <p style="font-size:11px">Earn ${config.adValue} TK instantly</p>
                     </div>
-                    <button class="btn task-btn ${isDone ? 'btn-secondary' : 'btn-primary'}" 
-                        onclick="handleTask('${key}', '${task.type}', '${task.url}', ${task.reward}, ${task.timer || 0}, this)" 
-                        ${isDone ? 'disabled' : ''}>
-                        ${isDone ? 'Done' : 'Start'}
-                    </button>
-                </div>`;
-                list.innerHTML += html;
-            });
-        }
+                    <button class="btn-claim" onclick="watchAd()">Watch</button>
+                </div>
+            `;
 
-        window.handleTask = (id, type, url, reward, timer, btn) => {
-            if(btn.disabled) return;
-            
-            tg.openLink(url);
-            btn.disabled = true;
-            
-            let btnText = "Checking...";
-            let waitTime = type === 'video' ? (timer || 10) : 5; // Video timer or 5s default
-            
-            // Countdown UI
-            const interval = setInterval(() => {
-                btn.innerText = `Wait ${waitTime}s`;
-                waitTime--;
-                if(waitTime < 0) {
-                    clearInterval(interval);
-                    btn.innerText = "Claim Reward";
-                    btn.disabled = false;
-                    btn.onclick = () => claimReward(id, reward, btn);
-                }
-            }, 1000);
-        };
-
-        async function claimReward(taskId, amount, btn) {
-            btn.innerText = "Claiming...";
-            try {
-                await db.ref(`users/${user.id}/balance`).set(firebase.database.ServerValue.increment(amount));
-                await db.ref(`users/${user.id}/completedTasks/${taskId}`).set(true);
-                
-                user.balance += amount;
-                if(!user.completedTasks) user.completedTasks = {};
-                user.completedTasks[taskId] = true;
-                
-                tg.showAlert(`Success! You earned ${amount} TK`);
-                renderApp();
-            } catch(e) {
-                tg.showAlert("Error claiming reward.");
-                btn.innerText = "Try Again";
-                btn.disabled = false;
+            // Bonus Tasks from Config
+            if(config.tasks) {
+                Object.entries(config.tasks).forEach(([id, t]) => {
+                    const done = user.completedTasks && user.completedTasks[id];
+                    container.innerHTML += `
+                        <div class="task-box">
+                            <div class="task-img" style="background: ${t.type === 'telegram' ? '#229ED9' : '#FF0000'};">
+                                <i class="${t.type === 'telegram' ? 'fab fa-telegram-plane' : 'fab fa-youtube'}"></i>
+                            </div>
+                            <div style="flex:1">
+                                <h5>${t.name}</h5>
+                                <p style="font-size:11px">+${t.reward} TK Reward</p>
+                            </div>
+                            <button class="btn-claim" ${done ? 'disabled style="background:#ccc"' : ''} 
+                                onclick="handleBonusTask('${id}', '${t.url}', ${t.reward}, ${t.timer})">
+                                ${done ? 'Done' : 'Start'}
+                            </button>
+                        </div>
+                    `;
+                });
             }
         }
 
-        // --- AD WATCH LOGIC ---
-        window.watchAd = async () => {
-            // Simulate Ad for Demo (Replace with real SDK)
-            tg.showConfirm("Watch Ad for Reward?", async (ok) => {
-                if(ok) {
-                    localBalance += (appSettings.adValue || 0.5);
-                    localStorage.setItem(`tempBal_${user.id}`, localBalance);
-                    
-                    user.dailyAds = (user.dailyAds || 0) + 1;
-                    user.totalEarned = (user.totalEarned || 0) + (appSettings.adValue || 0.5);
-                    
-                    await db.ref(`users/${user.id}`).update({
-                        dailyAds: user.dailyAds,
-                        totalEarned: user.totalEarned
-                    });
-                    
-                    renderApp();
-                    tg.showAlert("Ad Bonus Added to Earning Wallet!");
-                }
+        // === ANTI-CHEAT TASK HANDLER ===
+        async function handleBonusTask(id, url, reward, timer) {
+            tg.openLink(url);
+            
+            const { value: claim } = await Swal.fire({
+                title: 'Wait for Timer',
+                html: `Keep the page open for <b>${timer}</b> seconds.`,
+                timer: timer * 1000,
+                timerProgressBar: true,
+                showConfirmButton: false,
+                allowOutsideClick: false
             });
-        };
 
-        // --- WALLET LOGIC ---
-        document.getElementById('btn-move-balance').onclick = async () => {
-            if(localBalance < 100) return;
-            await db.ref(`users/${user.id}/balance`).set(firebase.database.ServerValue.increment(localBalance));
-            user.balance += localBalance;
-            localBalance = 0;
-            localStorage.setItem(`tempBal_${user.id}`, 0);
-            renderApp();
-            tg.showAlert("Transferred to Main Balance!");
-        };
-        
-        document.getElementById('withdraw-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const amt = parseFloat(document.getElementById('wd-amount').value);
-            const method = document.getElementById('wd-method').value;
-            const acc = document.getElementById('wd-account').value;
+            // Update Database
+            await db.ref(`users/${user.id}/balance`).set(firebase.database.ServerValue.increment(reward));
+            await db.ref(`users/${user.id}/completedTasks/${id}`).set(true);
             
-            if(amt > user.balance) return tg.showAlert("Insufficient Balance");
-            
-            const req = { userId: user.id, amount: amt, method, account: acc, status: 'pending', date: Date.now() };
-            await db.ref('withdrawals').push(req);
-            await db.ref(`users/${user.id}/balance`).set(firebase.database.ServerValue.increment(-amt));
-            
-            user.balance -= amt;
-            renderApp();
-            tg.showAlert("Withdrawal Request Submitted!");
-            e.target.reset();
-        };
+            user.balance += reward;
+            tg.HapticFeedback.notificationOccurred('success');
+            Swal.fire("Success", `Added ${reward} TK to your balance!`, "success");
+            renderUI();
+        }
 
-        // --- UTILS ---
-        window.navTo = (pageId) => {
+        // === SPIN WHEEL LOGIC ===
+        function openSpinWheel() { document.getElementById('spin-overlay').style.display = 'flex'; }
+        function closeSpin() { document.getElementById('spin-overlay').style.display = 'none'; }
+
+        function spinNow() {
+            if(isSpinning) return;
+            if(user.balance < 1) return Swal.fire("Low Balance", "You need at least 1 TK to spin!", "warning");
+
+            isSpinning = true;
+            const wheel = document.getElementById('wheel');
+            const deg = Math.floor(5000 + Math.random() * 5000);
+            wheel.style.transform = `rotate(${deg}deg)`;
+
+            setTimeout(async () => {
+                isSpinning = false;
+                const winAmt = (Math.random() * 2).toFixed(2);
+                await db.ref(`users/${user.id}/balance`).set(firebase.database.ServerValue.increment(parseFloat(winAmt) - 1));
+                user.balance = user.balance - 1 + parseFloat(winAmt);
+                Swal.fire("Result", `You spent 1.00 TK and won ${winAmt} TK!`, "info");
+                renderUI();
+            }, 4000);
+        }
+
+        // === NAVIGATION ===
+        function navTo(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active'); // Needs event context
-        };
-        
-        window.copyRef = () => {
-            const el = document.getElementById('ref-link');
-            el.select(); document.execCommand('copy');
-            tg.showAlert("Link Copied!");
-        };
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.currentTarget.classList.add('active');
+            window.scrollTo(0,0);
+        }
 
-        // Start App
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+
+        // === INITIALIZE ===
         init();
     </script>
 </body>
